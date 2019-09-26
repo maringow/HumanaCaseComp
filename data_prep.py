@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 
 #####################################################################################
 # DATA PREP
@@ -21,46 +22,49 @@ df_outcomes['count_leadup_events'] = df_outcomes['id']\
 
 df_outcomes['ltot_status'] = 0
 
-df_outcomes.head(10)
+print(df_outcomes.head(10))
 
 # create dataframe of all opioid prescriptions
-df_opioid = df_raw[df_raw['event_descr'] == 'RX Claim - Paid']
-df_opioid = df_opioid[df_opioid['MME'].isnull() == False]
+df_opioid = df_raw[(df_raw['event_descr'] == 'RX Claim - Paid') & (df_raw['MME'].isnull() == False)]
 df_opioid = df_opioid.rename(columns={'id': 'member_id'})
 
-df_opioid.head()
+print(df_opioid.head())
 
 # select only members that total at least 163 days of opioids supplied
 df_total_opioid_counts = df_raw[['id', 'PAY_DAY_SUPPLY_CNT']].groupby('id').sum()
 possible_positives = df_total_opioid_counts[df_total_opioid_counts['PAY_DAY_SUPPLY_CNT'] >= 162].index
 
 len(possible_positives)
+possible_positives = possible_positives.sort_values()
+possible_positives
 
 # build shell dataframe of member id, day, coverage, and qualifying events for days 0 onward
-
 day_range = range(-1300, 1101)
 index = pd.MultiIndex.from_product([possible_positives, day_range], names = ['member_id', 'day'])
 df_coverage = pd.DataFrame(index=index).reset_index()
 df_coverage['covered'] = 0
 df_coverage['qe'] = 0
+df_coverage = df_coverage.merge(df_opioid[['member_id', 'Days', 'PAY_DAY_SUPPLY_CNT']], left_on=(['member_id', 'day']), \
+                  right_on=(['member_id', 'Days']), how='left')
 
-df_coverage.head()
+df_coverage = df_coverage.drop(columns=['Days'])
+df_coverage = df_coverage.rename(columns={'PAY_DAY_SUPPLY_CNT': 'days_supply'})
 
-# distribute opioid pay day supply counts across df_coverage. Day prescribed is day 1
+# df_coverage = df_coverage[df_coverage['member_id'] == 'ID10013863216']  # for testing a single member
+print(df_coverage[df_coverage['days_supply'].isnull() == False].head())
 
-df_opioid = df_opioid[df_opioid['member_id'] == 'ID10013863216']  # test with 1 ID - remove later
-df_opioid.head(50)
+for g in df_coverage.sort_values(['member_id', 'day']).groupby('member_id').groups.values():
+    supply = 0
+    for i in g:
+        dfi = df_coverage.loc[i]
+        if not math.isnan(dfi.days_supply) and int(dfi.days_supply):
+            supply += int(dfi.days_supply)
+        if supply:
+            df_coverage.loc[i, 'covered'] = 1
+            supply -= 1
 
-for i in df_opioid.index:
-    day = df_opioid['Days'][i]
-    member_id = df_opioid['member_id'][i]
-    count = df_opioid['PAY_DAY_SUPPLY_CNT'][i]
-    while count > 0:
-        df_coverage[(df_coverage['day'] == day) & (df_coverage['member_id'] == member_id)]['covered'] = 1
-        day += 1
-        count = count - 1
+print(df_coverage[1300:1400])
 
-df_coverage.head()
 
 
 #####################################################################################
