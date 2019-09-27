@@ -64,6 +64,7 @@ for g in df_coverage.sort_values(['member_id', 'day']).groupby('member_id').grou
             supply -= 1
 
 print(df_coverage[1300:1400])
+df_coverage.to_csv('C:\\Users\\mgow\\Documents\\Personal\\Humana Case Comp\\df_coverage.csv')
 
 
 
