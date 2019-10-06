@@ -1,12 +1,14 @@
 import pandas as pd
 import numpy as np
 import data_prep
+from sklearn.model_selection import train_test_split
 
 #####################################################################################
 # FEATURE ENGINEERING
 #####################################################################################
 
-df_features = pd.read_csv('df_outcomes.csv')
+# read in data
+df_outcomes = pd.read_csv('df_outcomes.csv')
 df_raw = pd.read_csv('C:\\Users\\mgow\\Documents\\Personal\\Humana Case Comp\\HMAHCC_COMP.csv')
 
 
@@ -25,7 +27,6 @@ df_days_before_0 = df_raw[['id', 'Days']].groupby('id').min().reset_index()
 df_days_before_0 = df_days_before_0.rename(columns={'Days': 'days_before_0'})
 df_days_before_0['days_before_0'] = abs(df_days_before_0['days_before_0'])
 
-df_outcomes = pd.read_csv('C:\\Users\\mgow\\Documents\\Personal\\Humana Case Comp\\df_outcomes.csv')
 df_outcomes = df_outcomes.merge(df_days_before_0, how = 'left', left_on = 'member_id', right_on = 'id', right_index=False)
 df_outcomes.drop(columns='id', inplace=True)
 
@@ -60,7 +61,7 @@ df_opioid_sum = df_prescriptions[['member_id', 'PAY_DAY_SUPPLY_CNT']].groupby('m
 df_opioid_sum.rename(columns={'PAY_DAY_SUPPLY_CNT': 'sum_prior_opioids'}, inplace=True)
 
 df_outcomes = df_outcomes.merge(df_opioid_sum, how = 'left', on = 'member_id', right_index=False)
-df_outcomes['sum_prior_opioids_std'] = df_outcomes['days_before_0']
+df_outcomes['sum_prior_opioids_std'] = df_outcomes['sum_prior_opioids'] / df_outcomes['days_before_0']
 
 # Flag if they took opioids before day 0
 df_outcomes['prior_opioids_flag'] = df_outcomes['sum_prior_opioids'].apply(lambda x: 1 if x > 0 else 0)
@@ -87,6 +88,21 @@ df_outcomes['prior_pain_flag'] = df_outcomes['member_id'].apply(lambda x: 1 if x
 
 # check output
 print(df_outcomes)
+df_outcomes_train = df_outcomes.drop(columns='ltot_status')
+df_outcomes_test = df_outcomes['ltot_status']
+
+# train-test split
+
+x_train, x_test, y_train, y_test = train_test_split(df_outcomes_train, df_outcomes_test, test_size=.2, shuffle=True)
+
+x_train.to_csv('x_train.csv')
+x_test.to_csv('x_test.csv')
+y_train.to_csv('y_train.csv')
+y_test.to_csv('y_test.csv')
+
+
+
+
 
 
 
