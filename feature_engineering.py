@@ -32,6 +32,17 @@ df_outcomes.head()
 
 # Supply sum of opioids before day 0 / number of days before 0
 
+""" 
+QUERY FOR TESTING:
+
+select id, sum(cast(pay_day_supply_cnt as int)) from comp
+where event_descr = 'RX Claim - Paid'
+and MME is not null
+and Days < 0
+group by id
+"""
+
+
 # Flag if they have taken Psych
 
 # Flag if they have taken Pain
