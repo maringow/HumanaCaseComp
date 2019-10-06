@@ -87,18 +87,12 @@ prior_pain_members = df_pain_prescriptions['member_id'].unique()
 df_outcomes['prior_pain_flag'] = df_outcomes['member_id'].apply(lambda x: 1 if x in prior_pain_members else 0)
 
 # check output
-print(df_outcomes)
-df_outcomes_train = df_outcomes.drop(columns='ltot_status')
-df_outcomes_test = df_outcomes['ltot_status']
+df_outcomes_features = df_outcomes.reset_index()
+print(df_outcomes_features)
+df_outcomes_features.to_csv('df_outcomes_features.csv')
 
-# train-test split
+#df_outcomes_test = df_outcomes[['ltot_status']]
 
-x_train, x_test, y_train, y_test = train_test_split(df_outcomes_train, df_outcomes_test, test_size=.2, shuffle=True)
-
-x_train.to_csv('x_train.csv')
-x_test.to_csv('x_test.csv')
-y_train.to_csv('y_train.csv')
-y_test.to_csv('y_test.csv')
 
 
 
