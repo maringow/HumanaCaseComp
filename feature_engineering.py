@@ -38,7 +38,8 @@ df_unique_prescriptions.drop(columns='member_id', inplace=True)
 df_unique_prescriptions.rename(columns={'event_attr5': 'count_unique_scripts'}, inplace=True)
 
 df_outcomes = df_outcomes.merge(df_unique_prescriptions, how = 'left', on = 'member_id', right_index=False)
-df_outcomes.head()
+
+df_outcomes['count_unique_scripts_std'] = df_outcomes['count_unique_scripts'] / df_outcomes['days_before_0']
 
 # Supply sum of opioids before day 0 / number of days before 0
 
@@ -59,7 +60,7 @@ df_opioid_sum = df_prescriptions[['member_id', 'PAY_DAY_SUPPLY_CNT']].groupby('m
 df_opioid_sum.rename(columns={'PAY_DAY_SUPPLY_CNT': 'sum_prior_opioids'}, inplace=True)
 
 df_outcomes = df_outcomes.merge(df_opioid_sum, how = 'left', on = 'member_id', right_index=False)
-
+df_outcomes['sum_prior_opioids_std'] = df_outcomes['days_before_0']
 
 # Flag if they took opioids before day 0
 df_outcomes['prior_opioids_flag'] = df_outcomes['sum_prior_opioids'].apply(lambda x: 1 if x > 0 else 0)
@@ -83,6 +84,11 @@ df_pain_prescriptions.rename(columns={'id': 'member_id'}, inplace=True)
 prior_pain_members = df_pain_prescriptions['member_id'].unique()
 
 df_outcomes['prior_pain_flag'] = df_outcomes['member_id'].apply(lambda x: 1 if x in prior_pain_members else 0)
+
+# check output
+print(df_outcomes)
+
+
 
 
 
