@@ -1,17 +1,21 @@
 import pandas as pd
 import scipy
+from sklearn.model_selection import train_test_split
 
 
-# x_train = pd.read_csv('x_train.csv')
-# y_train = pd.read_csv('y_train.csv')
-# x_test = pd.read_csv('x_test.csv')
-# y_test = pd.read_csv('y_test.csv')
+pd.set_option('display.max_columns', None)
+df = pd.read_csv('df_outcomes_features.csv')
+
+df.drop(columns=['Unnamed: 0', 'index', 'X'], inplace=True)
+df.set_index('member_id', inplace=True)
+
+df_x = df.drop(columns='ltot_status')
+print(df_x.head())
+df_y = df['ltot_status']
+print(df_y.head())
 
 # train-test split
 
-x_train, x_test, y_train, y_test = train_test_split(df_outcomes_train, df_outcomes_test, test_size=.2, shuffle=True)
+x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size=.2, shuffle=True)
 
-# x_train.to_csv('x_train.csv')
-# x_test.to_csv('x_test.csv')
-# y_train.to_csv('y_train.csv')
-# y_test.to_csv('y_test.csv')
+
