@@ -104,12 +104,11 @@ unqualified_members = ['ID13362382498',
                         'ID96200812839',
                         'ID98715617553']
 
-df_outcomes.drop(unqualified_members)
+df_outcomes.drop(unqualified_members, inplace=True)
 # check and save output
 
 df_outcomes.to_csv('df_outcomes_features.csv')
 
-#df_outcomes_test = df_outcomes[['ltot_status']]
 
 
 
