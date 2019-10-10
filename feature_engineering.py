@@ -89,23 +89,25 @@ df_outcomes['prior_pain_flag'] = df_outcomes['member_id'].apply(lambda x: 1 if x
 # remove rows that should not be included in model
 df_outcomes.drop(columns='X', inplace=True)
 df_outcomes.set_index('member_id', inplace=True)
-unqualified_members = ['ID13362382498',
-                        'ID14698922966',
-                        'ID19738321946',
-                        'ID21430468895',
-                        'ID27220994153',
-                        'ID36354083119',
-                        'ID55796310983',
-                        'ID59083521579',
-                        'ID62579261726',
-                        'ID63293388003',
-                        'ID77890885331',
-                        'ID86806699161',
-                        'ID96200812839',
-                        'ID98715617553']
+# unqualified_members = ['ID13362382498',
+#                         'ID14698922966',
+#                         'ID19738321946',
+#                         'ID21430468895',
+#                         'ID27220994153',
+#                         'ID36354083119',
+#                         'ID55796310983',
+#                         'ID59083521579',
+#                         'ID62579261726',
+#                         'ID63293388003',
+#                         'ID77890885331',
+#                         'ID86806699161',
+#                         'ID96200812839',
+#                         'ID98715617553']
 
-df_outcomes.drop(unqualified_members, inplace=True)
-# check and save output
+
+
+# df_outcomes.drop(unqualified_members, inplace=True)
+df_outcomes.dropna(axis=0, subset=['Day0MME'], inplace=True)
 
 df_outcomes.to_csv('df_outcomes_features.csv')
 
